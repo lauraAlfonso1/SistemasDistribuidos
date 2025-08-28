@@ -34,9 +34,9 @@ public class PrincipalSrv extends JFrame {
     // === Interfaz ===
     private JButton bIniciar;
     private JLabel jLabel1;
-    private JTextPane logPane;      // reemplaza JTextArea
+    private JTextPane logPane;
     private JScrollPane jScrollPane1;
-    private JProgressBar progresoSrv; // la dejaremos oculta
+    private JProgressBar progresoSrv;
     private int ultimoPctSrv = -1;
 
     // =formato y estilo===
@@ -230,7 +230,7 @@ public class PrincipalSrv extends JFrame {
                     dp = new DatagramPacket(buf, buf.length);
                     socketudp.receive(dp);
 
-                    // DATA binario
+                    // datos binario
                     if (dp.getLength() >= 5
                             && buf[0] == 'D' && buf[1] == 'A' && buf[2] == 'T'
                             && buf[3] == 'A' && buf[4] == ':') {

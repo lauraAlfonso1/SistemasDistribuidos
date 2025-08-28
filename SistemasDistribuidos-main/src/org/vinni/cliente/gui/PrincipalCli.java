@@ -22,8 +22,8 @@ public class PrincipalCli extends JFrame {
 
     private final int PORT = 12345;
 
-    // === Red / Archivo ===
-    private static final int TamanioDatagrama = 1400; // seguro para evitar fragmentación
+    // ==Archivo ===
+    private static final int TamanioDatagrama = 1400;
     private String ipServidor = "127.0.0.1";
     private final JFileChooser selectorArchivo = new JFileChooser();
 
@@ -33,26 +33,25 @@ public class PrincipalCli extends JFrame {
     private JLabel jLabel1;
     private JLabel jLabel2;
     private JScrollPane jScrollPane1;
-    private JTextPane logPane;     // reemplaza JTextArea
+    private JTextPane logPane;
     private JTextField mensajeTxt;
     private JProgressBar progresoCli;
 
-    // === Logger interno (sin clases nuevas) ===
+    // === Nuevo estilo===
     private StyledDocument doc;
     private Style stTime, stInfo, stOk, stWarn, stErr, stServer, stClient, stSection, stMono;
     private final DateTimeFormatter HHMMSS = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    // — Progreso en UNA línea (en el log) —
+    // — Progreso barra—
     private int progressStartOffset = -1;
     private String progressTitle = null;
 
-    // — Barra de progreso SUAVE (animación) —
-    private javax.swing.Timer timerProgress;  // anima progreso visible
-    private int smoothCurrent = 0;            // valor actual visible
-    private int smoothTarget = 0;             // meta a alcanzar
-    private boolean progressActive = false;   // si hay envío activo
+    // — Barra de progreso  —
+    private javax.swing.Timer timerProgress;
+    private int smoothCurrent = 0;
+    private int smoothTarget = 0;
+    private boolean progressActive = false;
 
-    // Control local
     private int ultimoPctMostrado = -1;
 
     public PrincipalCli() {
@@ -61,16 +60,16 @@ public class PrincipalCli extends JFrame {
         initLogStyles();
         logSection("📡 Cliente listo");
 
-        // ===== Timer de animación de progreso (suave) =====
+        // ===== tiempo de la barra de progreso =====
         timerProgress = new javax.swing.Timer(30, e -> {
             if (!progressActive) return;
             if (smoothCurrent < smoothTarget) {
                 int gap = smoothTarget - smoothCurrent;
                 int step = Math.max(1, gap / 8);
-                step = Math.min(step, 3); // no subir de golpe
+                step = Math.min(step, 3); // dar tiempo
                 smoothCurrent += step;
                 progresoCli.setValue(smoothCurrent);
-                setProgress(smoothCurrent); // actualiza la línea única en el log
+                setProgress(smoothCurrent);
             }
         });
         timerProgress.start();
@@ -256,12 +255,12 @@ public class PrincipalCli extends JFrame {
         return (idx == -1) ? doc.getLength() : idx + 1;
     }
 
-    // ========= Lógica original con UI + barra suave =========
+    // ========= logica para la barra de progreso=========
     private void actualizarProgresoCliente(int pct, boolean forzarLog) {
         if (pct < 0) pct = 0;
         if (pct > 100) pct = 100;
 
-        // Solo movemos la META; el Timer hace la animación suave
+
         smoothTarget = pct;
 
         if (forzarLog || pct == 100 || ultimoPctMostrado < 0 || pct - ultimoPctMostrado >= 5) {
@@ -334,7 +333,7 @@ public class PrincipalCli extends JFrame {
                 canal.setTrafficClass(0x10); // LowDelay
             } catch (SocketException ignored) {}
 
-            // 1) header inicio
+            //inicio
             String header = "FILE|" + nombre + "|" + tamanio;
             DatagramPacket dpHeader = MiDatagrama.crearDataG(ipServidor, PORT, header);
             canal.send(dpHeader);
@@ -370,7 +369,7 @@ public class PrincipalCli extends JFrame {
                 actualizarProgresoCliente(pct, false);
             }
 
-            // 3) fin
+            // fin
             String fin = "END|" + nombre;
             DatagramPacket dpFin = MiDatagrama.crearDataG(ipServidor, PORT, fin);
             canal.send(dpFin);
@@ -392,11 +391,11 @@ public class PrincipalCli extends JFrame {
             } catch (SocketTimeoutException ignored) {}
 
 
-            // Forzar meta 100; la animación la alcanza
+
             actualizarProgresoCliente(100, true);
             endProgress(true, "Archivo enviado (" + tamanio + " bytes)");
 
-            // Pausa breve y reset suave
+            // Pausa y reinicio
             new javax.swing.Timer(700, ev -> {
                 if (smoothCurrent >= 100) {
                     ((javax.swing.Timer) ev.getSource()).stop();
@@ -420,7 +419,7 @@ public class PrincipalCli extends JFrame {
             JOptionPane.showMessageDialog(this, "Error de socket: " + ex.getMessage());
             endProgress(false, "Error de socket");
 
-            // reset rápido pero suave
+
             progressActive = false;
             new javax.swing.Timer(300, ev -> {
                 ((javax.swing.Timer) ev.getSource()).stop();
@@ -433,7 +432,7 @@ public class PrincipalCli extends JFrame {
             JOptionPane.showMessageDialog(this, "Error E/S: " + ex.getMessage());
             endProgress(false, "Error de E/S");
 
-            // reset rápido pero suave
+
             progressActive = false;
             new javax.swing.Timer(300, ev -> {
                 ((javax.swing.Timer) ev.getSource()).stop();
